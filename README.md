@@ -1,41 +1,55 @@
-# Snapdrop 
+# SnapDrop installation guide - with Apache2 on linux
 
-[Snapdrop](https://snapdrop.net): local file sharing in your browser. Inspired by Apple's Airdrop.
+After installing Apache2, move the **snapdrop folder** to the /var/www folder on your server.
 
+## Create the snapdrop server service :
 
-#### Snapdrop is built with the following awesome technologies:
-* Vanilla HTML5 / ES6 / CSS3  
-* Progressive Web App
-* [WebRTC](http://webrtc.org/)
-* [WebSockets](http://www.websocket.org/)
-* [NodeJS](https://nodejs.org/en/)
-* [Material Design](https://material.google.com/)
+Create a **snapdrop.service** file in /etc/systemd/system with the following content :
 
-> If you want to self-host your own instance, [you can with docker.](/docs/local-dev.md)
+    [Unit]
+    Description=Snapdrop Startup Service
+    After=network.target
+    
+    [Service]
+    ExecStart=/var/www/snapdrop/snapdrop-start.sh
+    Restart=always
+    RestartSec=5
+    
+    [Install]
+    WantedBy=multi-user.target
 
-## Support the Snapdrop Community
-Snapdrop is free. Still, we have to pay for the server. If you want to contribute, please use PayPal:
+Then execute the following lines :
 
-[<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif">](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=74D2NE84JHCWG&source=url)
+    chmod 700 /var/www/snapdrop/snapdrop-start.sh
+    apt-get install dos2unix
+    dos2unix /var/www/snapdrop/snapdrop-start.sh
+    systemctl enable snapdrop.service
+    service snapdrop start
 
-or Bitcoin:
+## Create the virtual host in apache2 :
+Create a **snapdrop.conf** file in /etc/apache2/sites-available with the following content :
 
-[<img src="https://coins.github.io/thx/logo-color-large-pill-320px.png" alt="CoinThx" width="200"/>](https://coins.github.io/thx/#1K9zQ8f4iTyhKyHWmiDKt21cYX2QSDckWB?label=Snapdrop&message=Thanks!%20Your%20contribution%20helps%20to%20keep%20Snapdrop%20free%20for%20everybody!) 
+    <VirtualHost *:80>
+    	ServerName snapdrop.my-domain.com
+    	DocumentRoot /var/www/snapdrop/client
+    
+    	RewriteEngine on
+    	RewriteCond %{HTTP:Upgrade} websocket [NC]
+    	RewriteCond %{HTTP:Connection} upgrade [NC]
+    	RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
+    </VirtualHost>
+    
+    <VirtualHost *:443>
+    	ServerName snapdrop.my-domain.com
+    	DocumentRoot /var/www/snapdrop/client
+    
+    	RewriteEngine on
+    	RewriteCond %{HTTP:Upgrade} websocket [NC]
+    	RewriteCond %{HTTP:Connection} upgrade [NC]
+    	RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
+    </VirtualHost>
 
-Alternatively, you can become a [Github Sponsor](https://github.com/sponsors/RobinLinus).
+Then execute the following lines:
 
-Thanks a lot for supporting free and open software!
-
-
-> Have any questions? You can read our [FAQ](/docs/faq.md)
-
-
-
-## Apps
-1. [Snapdrop PWA](/docs/faq.md) <!-- Don't know how to do a direct link -->
-
- 1. [Snapdrop Desktop App](https://github.com/infin1tyy/snapdrop-desktop) built on top of Electron. (Thanks to [Infin1tyy!](https://github.com/infin1tyy/)).
-
- 1. Feel free to make one :)
-
-
+    a2ensite snapdrop.conf
+    service apache2 restart
