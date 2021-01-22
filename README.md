@@ -1,55 +1,32 @@
-# SnapDrop installation guide - with Apache2 on linux
+# Snapdrop 
 
-After installing Apache2, move the **snapdrop folder** to the /var/www folder on your server.
+[Snapdrop](https://snapdrop.net): local file sharing in your browser. Inspired by Apple's Airdrop.
 
-## Create the snapdrop server service :
 
-Create a **snapdrop.service** file in /etc/systemd/system with the following content :
+#### Snapdrop is built with the following awesome technologies:
+* Vanilla HTML5 / ES6 / CSS3 frontend
+* [WebRTC](http://webrtc.org/) / [WebSockets](http://www.websocket.org/)
+* [NodeJS](https://nodejs.org/en/) backend
+* [Progressive Web App](https://de.wikipedia.org/wiki/Progressive_Web_App)
 
-    [Unit]
-    Description=Snapdrop Startup Service
-    After=network.target
-    
-    [Service]
-    ExecStart=/var/www/snapdrop/snapdrop-start.sh
-    Restart=always
-    RestartSec=5
-    
-    [Install]
-    WantedBy=multi-user.target
 
-Then execute the following lines :
+Have any questions? Read our [FAQ](/docs/faq.md).
 
-    chmod 700 /var/www/snapdrop/snapdrop-start.sh
-    apt-get install dos2unix
-    dos2unix /var/www/snapdrop/snapdrop-start.sh
-    systemctl enable snapdrop.service
-    service snapdrop start
+You can [host your own instance with docker](/docs/local-dev.md).
 
-## Create the virtual host in apache2 :
-Create a **snapdrop.conf** file in /etc/apache2/sites-available with the following content :
 
-    <VirtualHost *:80>
-    	ServerName snapdrop.my-domain.com
-    	DocumentRoot /var/www/snapdrop/client
-    
-    	RewriteEngine on
-    	RewriteCond %{HTTP:Upgrade} websocket [NC]
-    	RewriteCond %{HTTP:Connection} upgrade [NC]
-    	RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
-    </VirtualHost>
-    
-    <VirtualHost *:443>
-    	ServerName snapdrop.my-domain.com
-    	DocumentRoot /var/www/snapdrop/client
-    
-    	RewriteEngine on
-    	RewriteCond %{HTTP:Upgrade} websocket [NC]
-    	RewriteCond %{HTTP:Connection} upgrade [NC]
-    	RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
-    </VirtualHost>
+## Support the Snapdrop Community
+Snapdrop is free. Still, we have to pay for the server. If you want to contribute, please use PayPal:
 
-Then execute the following lines:
+[<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif">](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FTP9DXUR7LA7Q&source=url)
 
-    a2ensite snapdrop.conf
-    service apache2 restart
+or Bitcoin:
+
+[<img src="https://coins.github.io/thx/logo-color-large-pill-320px.png" alt="CoinThx" width="200"/>](https://coins.github.io/thx/#1K9zQ8f4iTyhKyHWmiDKt21cYX2QSDckWB?label=Snapdrop&message=Thanks!%20Your%20contribution%20helps%20to%20keep%20Snapdrop%20free%20for%20everybody!) 
+
+Alternatively, you can become a [Github Sponsor](https://github.com/sponsors/RobinLinus).
+
+Thanks a lot for supporting free and open software!
+
+
+
